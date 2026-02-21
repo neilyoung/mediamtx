@@ -68,8 +68,8 @@ if ! git rev-parse --git-dir >/dev/null 2>&1; then
   exit 1
 fi
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "Error: working tree is not clean. Commit/stash changes first." >&2
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "Error: tracked changes detected. Commit/stash tracked changes first." >&2
   exit 1
 fi
 
