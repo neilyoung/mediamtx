@@ -23,6 +23,7 @@ jobs:
       with:
         ref: ${{ matrix.ref }}
         fetch-depth: 0
+        fetch-tags: true
 
     - run: make binaries
 
