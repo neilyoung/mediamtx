@@ -1,0 +1,42 @@
+name: patch_releases
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - ref: prod/v1.14.0-patched
+          version: v1.14.0-patched
+        - ref: prod/v1.16.1-patched
+          version: v1.16.1-patched
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ matrix.ref }}
+        fetch-depth: 0
+
+    - run: make binaries
+
+    - run: cd binaries && sha256sum -b * > checksums.sha256
+
+    - uses: actions/upload-artifact@v6
+      with:
+        name: binaries-${{ matrix.version }}
+        path: binaries
+
+    - uses: softprops/action-gh-release@v2
+      with:
+        target_commitish: ${{ matrix.ref }}
+        tag_name: ${{ matrix.version }}-r${{ github.run_id }}a${{ github.run_attempt }}
+        name: ${{ matrix.version }}-r${{ github.run_id }}a${{ github.run_attempt }}
+        prerelease: true
+        files: binaries/*
