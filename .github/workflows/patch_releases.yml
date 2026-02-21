@@ -39,7 +39,9 @@ jobs:
     - uses: softprops/action-gh-release@v2
       with:
         target_commitish: ${{ matrix.ref }}
-        tag_name: ${{ matrix.version }}-r${{ github.run_id }}a${{ github.run_attempt }}
-        name: ${{ matrix.version }}-r${{ github.run_id }}a${{ github.run_attempt }}
+        tag_name: ${{ matrix.version }}
+        name: ${{ matrix.version }}
         prerelease: true
+        append_body: true
+        generate_release_notes: false
         files: binaries/*
