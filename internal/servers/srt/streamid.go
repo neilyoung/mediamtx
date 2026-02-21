@@ -2,6 +2,7 @@ package srt
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 )
 
@@ -18,6 +19,15 @@ type streamID struct {
 	query string
 	user  string
 	pass  string
+}
+
+func splitPathAndQuery(rawPath string) (string, string) {
+	i := strings.IndexByte(rawPath, '?')
+	if i < 0 {
+		return rawPath, ""
+	}
+
+	return rawPath[:i], rawPath[i+1:]
 }
 
 func (s *streamID) unmarshal(raw string) error {
@@ -37,7 +47,7 @@ func (s *streamID) unmarshal(raw string) error {
 				s.user = value
 
 			case "r":
-				s.path = value
+				s.path, s.query = splitPathAndQuery(value)
 
 			case "h":
 
@@ -81,6 +91,10 @@ func (s *streamID) unmarshal(raw string) error {
 		}
 
 		s.path = parts[1]
+		if qPath, q := splitPathAndQuery(s.path); q != "" {
+			s.path = qPath
+			s.query = q
+		}
 
 		if len(parts) == 4 || len(parts) == 5 {
 			s.user, s.pass = parts[2], parts[3]
@@ -90,6 +104,14 @@ func (s *streamID) unmarshal(raw string) error {
 			s.query = parts[2]
 		} else if len(parts) == 5 {
 			s.query = parts[4]
+		}
+	}
+
+	if s.query != "" {
+		var err error
+		s.query, err = url.QueryUnescape(s.query)
+		if err != nil {
+			return fmt.Errorf("invalid query: %w", err)
 		}
 	}
 
