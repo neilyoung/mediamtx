@@ -25,6 +25,8 @@ jobs:
         fetch-depth: 0
         fetch-tags: true
 
+    - run: git tag -f "${{ matrix.version }}"
+
     - run: make binaries
 
     - run: cd binaries && sha256sum -b * > checksums.sha256
