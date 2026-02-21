@@ -30,6 +30,24 @@ func TestStreamIDUnmarshal(t *testing.T) {
 			},
 		},
 		{
+			"mediamtx syntax path query",
+			"publish:mypath?param=value",
+			streamID{
+				mode:  streamIDModePublish,
+				path:  "mypath",
+				query: "param=value",
+			},
+		},
+		{
+			"mediamtx syntax path encoded query",
+			"publish:mypath?param1=value1%26param2=value2",
+			streamID{
+				mode:  streamIDModePublish,
+				path:  "mypath",
+				query: "param1=value1&param2=value2",
+			},
+		},
+		{
 			"mediamtx syntax 3",
 			"read:mypath:myuser:mypass:myquery",
 			streamID{
@@ -48,6 +66,24 @@ func TestStreamIDUnmarshal(t *testing.T) {
 				path: "results.csv",
 				user: "johnny",
 				pass: "mypass",
+			},
+		},
+		{
+			"standard syntax path query",
+			"#!::m=publish,r=results.csv?param=value",
+			streamID{
+				mode:  streamIDModePublish,
+				path:  "results.csv",
+				query: "param=value",
+			},
+		},
+		{
+			"standard syntax path encoded query",
+			"#!::m=publish,r=results.csv?param1=value1%26param2=value2",
+			streamID{
+				mode:  streamIDModePublish,
+				path:  "results.csv",
+				query: "param1=value1&param2=value2",
 			},
 		},
 		{
