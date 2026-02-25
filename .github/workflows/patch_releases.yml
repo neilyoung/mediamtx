@@ -15,8 +15,8 @@ jobs:
         include:
         - ref: prod/v1.14.0-patched
           version: v1.14.0-patched
-        - ref: prod/v1.16.1-patched
-          version: v1.16.1-patched
+        - ref: prod/v1.16.2-patched
+          version: v1.16.2-patched
 
     steps:
     - uses: actions/checkout@v6
