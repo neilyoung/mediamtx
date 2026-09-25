@@ -13,8 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - ref: prod/v1.16.2-patched
-          version: v1.16.2-patched
+        - ref: prod/v1.16.3-patched
+          version: v1.16.3-patched
 
     steps:
     - uses: actions/checkout@v6
