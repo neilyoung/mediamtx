@@ -105,6 +105,22 @@ var incomingVideoCodecs = []webrtc.RTPCodecParameters{
 		},
 		PayloadType: 106,
 	},
+	{
+		RTPCodecCapability: webrtc.RTPCodecCapability{
+			MimeType:    webrtc.MimeTypeRTX,
+			ClockRate:   90000,
+			SDPFmtpLine: "apt=105",
+		},
+		PayloadType: 107,
+	},
+	{
+		RTPCodecCapability: webrtc.RTPCodecCapability{
+			MimeType:    webrtc.MimeTypeRTX,
+			ClockRate:   90000,
+			SDPFmtpLine: "apt=106",
+		},
+		PayloadType: 108,
+	},
 }
 
 var incomingAudioCodecs = []webrtc.RTPCodecParameters{

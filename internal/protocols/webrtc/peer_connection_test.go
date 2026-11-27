@@ -64,6 +64,49 @@ func TestPeerConnectionCloseImmediately2(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 }
 
+func TestPeerConnectionAcceptsH264RTX(t *testing.T) {
+	for _, profile := range []string{"42001f", "42e01f"} {
+		t.Run(profile, func(t *testing.T) {
+			var engine webrtc.MediaEngine
+			h264 := webrtc.RTPCodecCapability{
+				MimeType:     webrtc.MimeTypeH264,
+				ClockRate:    90000,
+				SDPFmtpLine:  "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=" + profile,
+				RTCPFeedback: []webrtc.RTCPFeedback{{Type: "nack"}},
+			}
+			require.NoError(t, engine.RegisterCodec(webrtc.RTPCodecParameters{
+				RTPCodecCapability: h264,
+				PayloadType:        103,
+			}, webrtc.RTPCodecTypeVideo))
+			require.NoError(t, engine.RegisterCodec(webrtc.RTPCodecParameters{
+				RTPCodecCapability: webrtc.RTPCodecCapability{
+					MimeType: webrtc.MimeTypeRTX, ClockRate: 90000, SDPFmtpLine: "apt=103",
+				},
+				PayloadType: 104,
+			}, webrtc.RTPCodecTypeVideo))
+			publisher, err := webrtc.NewAPI(webrtc.WithMediaEngine(&engine)).NewPeerConnection(webrtc.Configuration{})
+			require.NoError(t, err)
+			defer publisher.Close() //nolint:errcheck
+			track, err := webrtc.NewTrackLocalStaticRTP(h264, "video", "publisher")
+			require.NoError(t, err)
+			_, err = publisher.AddTrack(track)
+			require.NoError(t, err)
+			offer, err := publisher.CreateOffer(nil)
+			require.NoError(t, err)
+			require.Contains(t, offer.SDP, "a=ssrc-group:FID ")
+
+			receiver := &PeerConnection{LocalRandomUDP: true, Log: test.NilLogger}
+			require.NoError(t, receiver.Start())
+			defer receiver.Close()
+			answer, err := receiver.CreateFullAnswer(&offer)
+			require.NoError(t, err)
+			require.Contains(t, answer.SDP, "a=rtpmap:104 rtx/90000\r\n")
+			require.Contains(t, answer.SDP, "a=fmtp:104 apt=103\r\n")
+			require.Contains(t, answer.SDP, "a=rtcp-fb:103 nack\r\n")
+		})
+	}
+}
+
 func TestPeerConnectionCandidates(t *testing.T) {
 	for _, ca := range []string{
 		"udp random",
